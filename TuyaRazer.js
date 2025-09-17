@@ -25,16 +25,18 @@ export function ControllableParameters()
 	];
 }
 
-// CORRECTION: Chaque contrôleur a maintenant son propre tuyaVirtualDevice
-// au lieu d'une variable globale unique qui écrasait les autres dispositifs
+// HYBRIDE: Variable globale pour Signal RGB + instance dans controller pour multi-dispositifs
+let tuyaVirtualDevice;
 
 export function Initialize()
 {
     if (controller.enabled)
     {
-        // Attacher le tuyaVirtualDevice au contrôleur spécifique
-        // au lieu d'utiliser une variable globale
+        // Créer l'instance dans le controller (pour le multi-dispositifs)
         controller.tuyaVirtualDevice = new TuyaVirtualDevice(controller.tuyaDevice);
+        
+        // MAIS aussi assigner à la variable globale (pour l'affichage Signal RGB)
+        tuyaVirtualDevice = controller.tuyaVirtualDevice;
     }
 }
 
@@ -45,11 +47,11 @@ export function Update()
 
 export function Render()
 {
-    if (controller.enabled && controller.tuyaVirtualDevice)
+    if (controller.enabled && tuyaVirtualDevice)
     {
         let now = Date.now();
         // Passer frameDelay depuis les paramètres configurables
-        controller.tuyaVirtualDevice.render(lightingMode, forcedColor, frameDelay, now);
+        tuyaVirtualDevice.render(lightingMode, forcedColor, frameDelay, now);
     }
 }
 
