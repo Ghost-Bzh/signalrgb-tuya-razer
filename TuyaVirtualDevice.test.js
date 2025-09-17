@@ -10,7 +10,7 @@ export default class TuyaVirtualDevice extends BaseClass
         super();
         // Initialize tuya device from saved data
         this.tuyaDevice = new TuyaDevice(deviceData, null);
-        this.frameDelay = 50;
+        this.frameDelay = 50; // Valeur par défaut, sera mise à jour par render()
         this.lastRender = 0;
 
         this.setupDevice(this.tuyaDevice);
@@ -51,8 +51,14 @@ export default class TuyaVirtualDevice extends BaseClass
         device.setControllableLeds(this.ledNames, this.ledPositions);
     }
 
-    render(lightingMode, forcedColor, now)
+    // MODIFICATION: Nouvelle signature pour accepter frameDelay en paramètre
+    render(lightingMode, forcedColor, frameDelay, now)
     {
+        // Mettre à jour frameDelay depuis les paramètres Signal RGB
+        if (frameDelay !== undefined) {
+            this.frameDelay = frameDelay;
+        }
+        
         if (now - this.lastRender > this.frameDelay)
         {
             this.lastRender = now;
