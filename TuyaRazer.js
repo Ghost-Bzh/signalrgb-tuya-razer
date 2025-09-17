@@ -50,8 +50,11 @@ export function Render()
     if (controller.enabled && controller.tuyaVirtualDevice)
     {
         let now = Date.now();
-        // Passer frameDelay depuis les paramètres configurables
-        tuyaVirtualDevice.render(lightingMode, forcedColor, frameDelay, now);
+       	let mode = controller.getProperty("lightingMode");
+		let color = controller.getProperty("forcedColor");
+		let delay = controller.getProperty("frameDelay");
+
+		controller.tuyaVirtualDevice.render(mode, color, delay, now);
     }
 }
 
