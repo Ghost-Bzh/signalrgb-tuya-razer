@@ -8,7 +8,7 @@ import TuyaVirtualDevice from './TuyaVirtualDevice.test.js';
 /*   DEVICE   */
 /* ---------- */
 export function Name() { return "Tuya Razer"; }
-export function Version() { return "0.0.1"; }
+export function Version() { return "0.0.2"; }
 export function Type() { return "network"; }
 export function Publisher() { return "RickOfficial"; }
 export function Size() { return [1, 1]; }
@@ -19,19 +19,22 @@ export function ControllableParameters()
 	return [
 		{"property":"lightingMode", "group":"settings", "label":"Lighting Mode", "type":"combobox", "values":["Canvas", "Forced"], "default":"Canvas"},
 		{"property":"forcedColor", "group":"settings", "label":"Forced Color", "min":"0", "max":"360", "type":"color", "default":"#009bde"},
+		{"property":"frameDelay", "group":"settings", "label":"Frame Delay (ms)", "min":"20", "max":"200", "type":"number", "default":"50"},
 		{"property":"turnOff", "group":"settings", "label":"On shutdown", "type":"combobox", "values":["Do nothing", "Single color", "Turn device off"], "default":"Turn device off"},
         {"property":"shutDownColor", "group":"settings", "label":"Shutdown Color", "min":"0", "max":"360", "type":"color", "default":"#8000FF"}
 	];
 }
 
-let tuyaVirtualDevice;
+// CORRECTION: Chaque contrôleur a maintenant son propre tuyaVirtualDevice
+// au lieu d'une variable globale unique qui écrasait les autres dispositifs
 
 export function Initialize()
 {
     if (controller.enabled)
     {
-        // Here we create the device
-        tuyaVirtualDevice = new TuyaVirtualDevice(controller.tuyaDevice);
+        // Attacher le tuyaVirtualDevice au contrôleur spécifique
+        // au lieu d'utiliser une variable globale
+        controller.tuyaVirtualDevice = new TuyaVirtualDevice(controller.tuyaDevice);
     }
 }
 
@@ -42,10 +45,11 @@ export function Update()
 
 export function Render()
 {
-    if (controller.enabled)
+    if (controller.enabled && controller.tuyaVirtualDevice)
     {
         let now = Date.now();
-        tuyaVirtualDevice.render(lightingMode, forcedColor, now);
+        // Passer frameDelay depuis les paramètres configurables
+        controller.tuyaVirtualDevice.render(lightingMode, forcedColor, frameDelay, now);
     }
 }
 
