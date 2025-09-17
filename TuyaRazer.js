@@ -11,7 +11,7 @@ export function Name() { return "Tuya Razer"; }
 export function Version() { return "0.0.2"; }
 export function Type() { return "network"; }
 export function Publisher() { return "RickOfficial"; }
-export function Size() { return [1, 1]; }
+export function Size() { return [4, 1]; }
 export function DefaultPosition() {return [0, 70]; }
 export function DefaultScale(){return 1.0;}
 export function ControllableParameters()
