@@ -49,10 +49,10 @@ export function Render()
 {
     if (controller.enabled && controller.tuyaVirtualDevice)
     {
-        let now = Date.now();
-       	let mode = controller.getProperty("lightingMode");
-		let color = controller.getProperty("forcedColor");
-		let delay = controller.getProperty("frameDelay");
+        let now   = Date.now();
+        let mode  = lightingMode  || "Canvas";
+        let color = forcedColor   || "#009bde";
+        let delay = frameDelay    || 100;
 
 		controller.tuyaVirtualDevice.render(mode, color, delay, now);
     }
