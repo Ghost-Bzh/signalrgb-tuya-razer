@@ -50,10 +50,10 @@ export function Render()
     if (controller.enabled && controller.tuyaVirtualDevice)
     {
         let now   = Date.now();
-        let mode  = controller.getProperty("lightingMode") || "Canvas";
-        let color = controller.getProperty("forcedColor") || "#009bde";
-        let delay = controller.getProperty("frameDelay") || 100;
-
+        let mode  = controller.lightingMode || "Canvas";
+        let color = controller.forcedColor || "#009bde";
+        let delay = controller.frameDelay || 100;
+		
 		controller.tuyaVirtualDevice.render(mode, color, delay, now);
     }
 }
