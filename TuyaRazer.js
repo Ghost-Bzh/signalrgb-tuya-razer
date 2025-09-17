@@ -47,7 +47,7 @@ export function Update()
 
 export function Render()
 {
-    if (controller.enabled && tuyaVirtualDevice)
+    if (controller.enabled && controller.tuyaVirtualDevice)
     {
         let now = Date.now();
         // Passer frameDelay depuis les paramètres configurables
