@@ -10,8 +10,8 @@ export default class TuyaVirtualDevice extends BaseClass
         super();
         // Initialize tuya device from saved data
         this.tuyaDevice = new TuyaDevice(deviceData, null);
-        this.frameDelay = 50; // Valeur par défaut, sera mise à jour par render()
-        this.lastRender = 0;
+        this.frameDelay = 80 + Math.random() * 40; // 80-120ms aléatoire
+        this.lastRender = Math.random() * 100; // Décalage initial 0-100ms
 
         this.setupDevice(this.tuyaDevice);
     }
