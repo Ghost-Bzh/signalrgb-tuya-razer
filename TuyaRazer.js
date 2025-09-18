@@ -24,10 +24,6 @@ export function ControllableParameters()
         {"property":"shutDownColor", "group":"settings", "label":"Shutdown Color", "min":"0", "max":"360", "type":"color", "default":"#8000FF"}
 	];
 }
-
-// HYBRIDE: Variable globale pour Signal RGB + instance dans controller pour multi-dispositifs
-let tuyaVirtualDevice;
-
 export function Initialize()
 {
     if (controller.enabled)
