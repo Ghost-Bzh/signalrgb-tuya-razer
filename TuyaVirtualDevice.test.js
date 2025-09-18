@@ -87,7 +87,18 @@ export default class TuyaVirtualDevice extends BaseClass
     
         for(let i = 0 ; i < this.ledPositions.length; i++){
             const ledPosition = this.ledPositions[i];
-            const color = device.color(ledPosition[0], ledPosition[1]);
+            let color = device.color(ledPosition[0], ledPosition[1]);
+            
+            // CORRECTION: Vérifier et nettoyer les couleurs invalides
+            if (!color || typeof color !== 'object' || 
+                isNaN(color.r) || isNaN(color.g) || isNaN(color.b) ||
+                color.r < 0 || color.g < 0 || color.b < 0 ||
+                color.r > 255 || color.g > 255 || color.b > 255) {
+                
+                // Utiliser une couleur par défaut si invalide
+                color = {r: 0, g: 155, b: 222}; // #009bde
+            }
+            
             RGBData.push(color);
         }
     
@@ -153,9 +164,16 @@ export default class TuyaVirtualDevice extends BaseClass
     }
 
     rgbToHsv(rgb) {
-        const r = rgb.r / 255;
-        const g = rgb.g / 255;
-        const b = rgb.b / 255;
+        // CORRECTION: Validation des entrées avant conversion
+        if (!rgb || typeof rgb !== 'object' || 
+            isNaN(rgb.r) || isNaN(rgb.g) || isNaN(rgb.b)) {
+            console.warn("Invalid RGB values, using default:", rgb);
+            return [200, 100, 87]; // Valeurs par défaut (bleu #009bde)
+        }
+        
+        const r = Math.max(0, Math.min(255, rgb.r)) / 255;
+        const g = Math.max(0, Math.min(255, rgb.g)) / 255;
+        const b = Math.max(0, Math.min(255, rgb.b)) / 255;
         
         const max = Math.max(r, g, b);
         const min = Math.min(r, g, b);
@@ -175,14 +193,37 @@ export default class TuyaVirtualDevice extends BaseClass
             h /= 6;
         }
         
+        // CORRECTION: Validation des résultats avant retour
+        const hue = Math.round(h * 360);
+        const saturation = Math.round(s * 100);
+        const value = Math.round(v * 100);
+        
+        // Vérifier que les valeurs sont valides
+        if (isNaN(hue) || isNaN(saturation) || isNaN(value)) {
+            console.warn("NaN detected in HSV conversion, using defaults");
+            return [200, 100, 87]; // Valeurs par défaut
+        }
+        
         return [
-            Math.round(h * 360),
-            Math.round(s * 100),
-            Math.round(v * 100)
+            Math.max(0, Math.min(360, hue)),
+            Math.max(0, Math.min(100, saturation)),
+            Math.max(0, Math.min(100, value))
         ];
     }
 
     getW32FromHex(hex, length) {
+        // CORRECTION: Validation et nettoyage de l'entrée hex
+        if (!hex || typeof hex !== 'string') {
+            hex = "0";
+        }
+        
+        // Enlever les caractères non-hex
+        hex = hex.replace(/[^0-9a-fA-F]/g, '');
+        
+        if (hex === '') {
+            hex = "0";
+        }
+        
         while (hex.length < length) {
             hex = '0' + hex;
         }
