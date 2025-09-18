@@ -27,7 +27,6 @@ export function ControllableParameters()
 }
 
 // Variables globales pour la gestion d'état
-let tuyaVirtualDevice;
 let lastRenderTime = 0;
 let isInitialized = false;
 
@@ -46,9 +45,6 @@ export function Initialize()
             
             // Créer l'instance dans le controller
             controller.tuyaVirtualDevice = new TuyaVirtualDevice(controller.tuyaDevice);
-            
-            // Assigner à la variable globale
-            tuyaVirtualDevice = controller.tuyaVirtualDevice;
             
             isInitialized = true;
             console.log("Tuya device initialized successfully");
