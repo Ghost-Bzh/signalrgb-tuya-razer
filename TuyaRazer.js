@@ -8,13 +8,12 @@ import TuyaVirtualDevice from './TuyaVirtualDevice.test.js';
 /*   DEVICE   */
 /* ---------- */
 export function Name() { return "Tuya Razer"; }
-export function Version() { return "0.0.3"; }
+export function Version() { return "0.0.2"; }
 export function Type() { return "network"; }
 export function Publisher() { return "RickOfficial"; }
-export function Size() { return [1, 1]; } // CORRECTION: Laissez Signal RGB ajuster automatiquement
+export function Size() { return [1, 1]; }
 export function DefaultPosition() {return [0, 70]; }
 export function DefaultScale(){return 1.0;}
-
 export function ControllableParameters()
 {
 	return [
@@ -26,66 +25,35 @@ export function ControllableParameters()
 	];
 }
 
-// CORRECTION: Variable globale nécessaire pour Signal RGB
+// HYBRIDE: Variable globale pour Signal RGB + instance dans controller pour multi-dispositifs
 let tuyaVirtualDevice;
 
 export function Initialize()
 {
-    if (controller && controller.enabled)
+    if (controller.enabled)
     {
-        // Créer l'instance dans le controller (pour multi-dispositifs)
+        // Créer l'instance dans le controller (pour le multi-dispositifs)
         controller.tuyaVirtualDevice = new TuyaVirtualDevice(controller.tuyaDevice);
-        
-        // CORRECTION: Assigner aussi à la variable globale (pour Signal RGB)
-        tuyaVirtualDevice = controller.tuyaVirtualDevice;
     }
 }
 
 export function Update()
 {
-    // Fonction vide pour l'instant
+
 }
 
 export function Render()
 {
-    // CORRECTION: Utiliser les variables globales directes, pas controller.xxx
-    if (controller && controller.enabled && tuyaVirtualDevice)
+    if (controller.enabled && tuyaVirtualDevice)
     {
         let now = Date.now();
-        
-        // CORRECTION: Accès correct aux paramètres globaux
-        const mode = lightingMode || "Canvas";
-        const color = forcedColor || "#009bde";
-        const delay = frameDelay || 50;
-        
-        tuyaVirtualDevice.render(mode, color, delay, now);
+        // Passer frameDelay depuis les paramètres configurables
+        controller.tuyaVirtualDevice.render(lightingMode, forcedColor, frameDelay, now);
     }
 }
 
 export function Shutdown()
 {
-    if (controller && controller.tuyaVirtualDevice)
-    {
-        const turnOffAction = turnOff || "Turn device off";
-        const shutDownColor = shutDownColor || "#8000FF";
-        
-        switch(turnOffAction) {
-            case "Single color":
-                controller.tuyaVirtualDevice.render("Forced", shutDownColor, 0, Date.now());
-                break;
-            case "Turn device off":
-                if (controller.tuyaDevice && typeof controller.tuyaDevice.turnOff === 'function') {
-                    controller.tuyaDevice.turnOff();
-                }
-                break;
-            // "Do nothing" - ne rien faire
-        }
-        
-        // Nettoyer les ressources
-        if (controller.tuyaVirtualDevice && typeof controller.tuyaVirtualDevice.cleanup === 'function') {
-            controller.tuyaVirtualDevice.cleanup();
-        }
-    }
 }
 
 export function Validate()
@@ -99,9 +67,12 @@ export function Validate()
 export function DiscoveryService()
 {
     this.ipCache = {};
+
     this.lastPollTime = -5000;
     this.PollInterval = 5000;
+
     this.devicesLoaded = false;
+
     this.negotiator = null;
 
     this.Initialize = function()
@@ -158,6 +129,7 @@ export function DiscoveryService()
     this.Update = function(force)
     {
         const now = Date.now();
+        // Also not using this
         if (this.negotiator)
         {
             this.negotiator.handleQueue(now);
