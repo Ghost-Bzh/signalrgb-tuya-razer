@@ -19,7 +19,7 @@ export function ControllableParameters()
 	return [
 		{"property":"lightingMode", "group":"settings", "label":"Lighting Mode", "type":"combobox", "values":["Canvas", "Forced"], "default":"Canvas"},
 		{"property":"forcedColor", "group":"settings", "label":"Forced Color", "min":"0", "max":"360", "type":"color", "default":"#009bde"},
-		{"property":"frameDelay", "group":"settings", "label":"Frame Delay (ms)", "min":"20", "max":"200", "type":"number", "default":"50"},
+		{"property":"frameDelay", "group":"settings", "label":"Frame Delay (ms)", "min":"20", "max":"200", "type":"number", "default":"100"},
 		{"property":"turnOff", "group":"settings", "label":"On shutdown", "type":"combobox", "values":["Do nothing", "Single color", "Turn device off"], "default":"Turn device off"},
         {"property":"shutDownColor", "group":"settings", "label":"Shutdown Color", "min":"0", "max":"360", "type":"color", "default":"#8000FF"}
 	];
