@@ -8,6 +8,13 @@ import { Hex } from './Crypto/Hex.test.js';
 import { Base64 } from './Crypto/Base64.test.js';
 import TuyaEncryptor from './Libs/TuyaEncryptor.test.js';
 
+// AJOUT: Gestion globale du throttling pour éviter les collisions
+const DEVICE_SEND_QUEUE = {
+    lastSend: 0,
+    minDelay: 30, // Délai minimum entre deux envois (ms)
+    queue: []
+};
+
 export default class TuyaDevice extends TuyaEncryptor
 {
     constructor(deviceData, crc)
@@ -15,11 +22,6 @@ export default class TuyaDevice extends TuyaEncryptor
         super();
 
         this.id             = deviceData.gwId;
-        // const deviceJson    = service.getSetting(this.id, 'data');
-        // if (deviceJson)
-        // {
-        //     deviceData = JSON.parse(deviceJson);
-        // }
 
         this.enabled         = deviceData.hasOwnProperty('enabled') ? deviceData.enabled : false;
         this.deviceType      = deviceData.hasOwnProperty('deviceType') ? deviceData.deviceType : 0;
@@ -46,6 +48,10 @@ export default class TuyaDevice extends TuyaEncryptor
         if (!this.broadcastIp) this.setBroadcastIp(this.ip);
         
         this.socket          = null;
+        
+        // AJOUT: Délai unique pour ce dispositif (évite envois simultanés)
+        this.sendOffset = Math.random() * 50; // 0-50ms de décalage aléatoire
+        this.lastSendTime = 0;
     }
 
     getName()
@@ -160,10 +166,28 @@ export default class TuyaDevice extends TuyaEncryptor
         service.saveSetting(this.id, 'data', JSON.stringify(this.toJson()));
     }
 
+    // NOUVELLE FONCTION: Throttling intelligent pour éviter collisions
+    canSendNow()
+    {
+        const now = Date.now();
+        const timeSinceLastSend = now - this.lastSendTime;
+        const timeSinceGlobalSend = now - DEVICE_SEND_QUEUE.lastSend;
+        
+        // Respecter le délai personnel ET le délai global
+        return timeSinceLastSend > 80 && timeSinceGlobalSend > DEVICE_SEND_QUEUE.minDelay;
+    }
+
     sendColors(colorString)
     {
         if (this.initialized)
         {
+            // AJOUT: Vérifier si on peut envoyer maintenant
+            if (!this.canSendNow())
+            {
+                // Trop tôt, ignorer cet envoi (le prochain frame viendra bientôt)
+                return;
+            }
+
             const nonce = this.randomHexBytes(12);
             const dataLength = colorString.length / 2 + 24;
 
@@ -196,6 +220,11 @@ export default class TuyaDevice extends TuyaEncryptor
 
             const byteArray = this.hexToByteArray(broadcastRequest);
             this.socket.write(byteArray.buffer, this.broadcastIp, this.broadcastPort);
+            
+            // AJOUT: Enregistrer l'heure d'envoi
+            const now = Date.now();
+            this.lastSendTime = now;
+            DEVICE_SEND_QUEUE.lastSend = now;
         } else
         {
             device.log('Not initialized');
